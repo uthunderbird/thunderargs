@@ -1,5 +1,5 @@
 __author__ = 'thunder'
-__version__ = '0.3.1a4'
+__version__ = '0.3.1a5'
 
 from .errors import ValidationError, ArgumentRequired
 

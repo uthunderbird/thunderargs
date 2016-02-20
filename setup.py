@@ -10,7 +10,7 @@ setup(
     description='Let you use function annotations (PEP 3107) to parse'
                 'and validate arguments',
     packages=['thunderargs'],
-    url='https://bitbucket.org/dsupiev/thunderargs',
+    url='https://github.com/uthunderbird/thunderargs',
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
     author="uthunderbird",
     author_email="undead.thunderbird@gmail.com",
