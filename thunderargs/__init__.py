@@ -132,18 +132,23 @@ class Arg(object):
 
 class Parser(object):
 
-    def __call__(self, dct):
+    def __call__(self, args, kwargs):
         """
         Just for simplify
         """
-        return self.validated(dct)
+        return self.validated(args, kwargs)
 
-    def __init__(self, structure):
+    def __init__(self, structure, ordered_names):
         self.structure = structure
+        self.ordered_names = ordered_names
         for name, arg in structure.items():
             arg.__name__ = arg.__name__ or name
 
-    def validated(self, dct):
+    def validated(self, args, dct):
+        args = {k: v for k, v in zip(self.ordered_names, args)}
         for key, arg_instance in self.structure.items():
-            dct[key] = arg_instance(dct.get(key, None))
-        return dct
+            if key in args:
+                args[key] = arg_instance(args.get(key, None))
+            else:
+                dct[key] = arg_instance(dct.get(key, None))
+        return [x[1] for x in sorted(args.items(), key=lambda x: self.ordered_names.index(x[0]))], dct

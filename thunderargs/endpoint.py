@@ -27,7 +27,7 @@ class Endpoint(object):
 
         if func.__annotations__:
             # Создаём парсер для данной структуры данных
-            self.parser = Parser(func.__annotations__)
+            self.parser = Parser(func.__annotations__, func.__code__.co_varnames)
             # Делаем инстансы данного класса вызываемыми.
             # Целевая функция оборачивается в декоратор, который
             # описн ниже
@@ -42,7 +42,8 @@ class Endpoint(object):
         def wrapper(*args, **kwargs):
             # Обертка принимает все аргументы, предназначенные
             # для целефой функции, и передаёт в парсер именованные.
-            return func(*args, **self.parser(kwargs))
+            args, kwargs = self.parser(args, kwargs)
+            return func(*args, **kwargs)
 
         return wrapper
 
