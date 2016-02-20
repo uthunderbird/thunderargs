@@ -1,0 +1,57 @@
+VERSION 0.1a2
+
++ changelog
++ 'required' feature for args
++ 'validators' ~
++ 'expander' ~
++ validfarm
++ source (meta-info for args that let arg_taker know where he must looking for)
+
+
+VERSION 0.1b
+
+
+^___________^
+
+
+VERSION 0.2a2
+
+
++ you can use `annotate` decorator to set `__annotations__` for function
+
+* for now route decorator returns same func that it takes.
+  It means that you can call this func straight
+
++ args have names (by default same that key)
+
++ custom errors to validators
+
+* fixed "required and default at same time" checking
+
+* `multiple` and `required` compability also was fixed
+
+* `multiple` and `default` compability also was fixed (don't sure successful or not)
+
+VERSION 0.2a3
+
+* fixed critical bug with `helpers.py` file
+
+VERSION 0.2
+
+Nothing changed. Just releasing that shit.
+
+VERSION 0.2.2
+
+source 'args' is default from now
+
+
+VERSION 0.3
+
+IMPORTANT: Flask proxy and all flask examples was moved to
+other project, 'flask-thunderargs'.
+You can take it from pypi. Repo is here: https://bitbucket.org/dsupiev/flask-thunderargs
+
+VERSION 0.3.1
+
+annotate_from don't more override origin
+Arg class have param DEFAULT_SOURCE for now
