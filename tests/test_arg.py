@@ -1,3 +1,4 @@
+import pytest
 from thunderargs import Arg, Nothing, ArgumentRequired
 
 
@@ -13,3 +14,14 @@ def test_default():
     assert arg.validated(Nothing) == 10
     assert Arg(default=None).validated(Nothing) is None
 
+
+def test_required():
+    # Argument can't be required and contain default value, it's just meanless
+    with pytest.raises(ValueError):
+        Arg(default="Lol", required=True)
+
+    with pytest.raises(ArgumentRequired):
+        Arg(required=True).validated(Nothing)
+
+    assert Arg(required=True).validated("asdf") == 'asdf'
+    assert Arg(required=True).validated(None) is None

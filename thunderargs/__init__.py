@@ -1,7 +1,7 @@
 from .errors import ValidationError, ArgumentRequired
 
 __author__ = 'thunder'
-__version__ = '0.3.1a5'
+__version__ = '0.3.1a6'
 
 
 class Nothing:

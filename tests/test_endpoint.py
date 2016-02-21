@@ -34,10 +34,10 @@ def test_basic_mixed():
 
 def test_default():
     @Endpoint
-    def calc(x: Arg(int, default=0), y: Arg(int, default=0), op: Arg(expander=OPERATION.get)):
+    def calc(x: Arg(int, default=2), y: Arg(int, default=2), op: Arg(expander=OPERATION.get)):
         return op(x, y)
     assert calc(5, 6, op='+') == 11
-    # assert calc(op='+') == 0
+    assert calc(op='+') == 4
 
 
 def test_required():
