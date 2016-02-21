@@ -1,7 +1,11 @@
+from .errors import ValidationError, ArgumentRequired
+
 __author__ = 'thunder'
 __version__ = '0.3.1a5'
 
-from .errors import ValidationError, ArgumentRequired
+
+class Nothing:
+    pass
 
 
 class Arg(object):
@@ -15,11 +19,11 @@ class Arg(object):
     def __call__(self, value):
         return self.validated(value)
 
-    def __init__(self, p_type=str, default=None, multiple=False, required=False,
+    def __init__(self, p_type=str, default=Nothing, multiple=False, required=False,
                  validators=[], expander=None, suppress_expanding_check=False,
                  source=None, arg_name=None):
 
-        if required and default is not None:
+        if required and default is not Nothing:
             raise ValueError("Argument can't have default value and be required at same time")
 
         if validators:
@@ -36,7 +40,7 @@ class Arg(object):
                 for i, value in enumerate(default):
                     for j, validator in enumerate(validators):
 
-                        if not isinstance(value, p_type) and not value == None:
+                        if not isinstance(value, p_type) and value is not Nothing:
                             raise ValueError("{} is not {} instance".format(value, p_type.__name__))
 
                         if not validator(value):
@@ -67,7 +71,7 @@ class Arg(object):
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
 
-        if not isinstance(value, self.type) and value is not None:
+        if not isinstance(value, self.type) and value is not Nothing:
             try:
                 typed_value = self.type(value)
             except TypeError:
@@ -75,13 +79,13 @@ class Arg(object):
                                                                             self.type.__name__,
                                                                             type(value).__name__))
 
-        elif value is None and self.default is not None:
+        elif value is Nothing and self.default is not Nothing:
             typed_value = self.default
 
         else:
             typed_value = value
 
-        if self.validators and value is not None:
+        if self.validators and value is not Nothing:
             for validator_no, validator in enumerate(self.validators):
                 if not validator(typed_value):
                     template = getattr(validator, 'message',
@@ -123,9 +127,8 @@ class Arg(object):
                 raise ArgumentRequired("Argument {} is required".format(self.__name__))
             return map(self._validate, value)
 
-        if value is None:
-            if self.required:
-                raise ArgumentRequired("Argument {} is required".format(self.__name__))
+        if value is Nothing and self.required:
+            raise ArgumentRequired("Argument {} is required".format(self.__name__))
 
         return self._validate(value)
 
@@ -145,10 +148,10 @@ class Parser(object):
             arg.__name__ = arg.__name__ or name
 
     def validated(self, args, dct):
-        args = {k: v for k, v in zip(self.ordered_names, args)}
+        args = dict(zip(self.ordered_names, args))
         for key, arg_instance in self.structure.items():
             if key in args:
-                args[key] = arg_instance(args.get(key, None))
+                args[key] = arg_instance(args.get(key, Nothing))
             else:
-                dct[key] = arg_instance(dct.get(key, None))
+                dct[key] = arg_instance(dct.get(key, Nothing))
         return [x[1] for x in sorted(args.items(), key=lambda x: self.ordered_names.index(x[0]))], dct

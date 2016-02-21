@@ -1,7 +1,6 @@
-__author__ = 'thunder'
-
 from . import Parser
 from .helpers import wraps
+
 
 class Endpoint(object):
 
@@ -32,35 +31,28 @@ class Endpoint(object):
             # Целевая функция оборачивается в декоратор, который
             # описн ниже
             self.callable = self._wrap_callable(func)
-
         else:
             self.callable = func
 
     def _wrap_callable(self, func):
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Обертка принимает все аргументы, предназначенные
             # для целефой функции, и передаёт в парсер именованные.
             args, kwargs = self.parser(args, kwargs)
             return func(*args, **kwargs)
-
         return wrapper
 
 
 def annotate(**structure):
-
     def decorator(func):
         func.__annotations__ = structure
         return func
-
     return decorator
 
 
 def annotate_from(source_func):
-
     def decorator(func):
         func.__annotations__.update(source_func.__annotations__)
         return func
-
     return decorator
