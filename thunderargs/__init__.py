@@ -71,7 +71,7 @@ class Arg(object):
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
 
-        if not isinstance(value, self.type) and value is not Nothing:
+        if not isinstance(value, self.type) and value is not Nothing and value is not None:
             try:
                 typed_value = self.type(value)
             except TypeError:

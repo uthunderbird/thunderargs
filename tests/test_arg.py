@@ -25,3 +25,6 @@ def test_required():
 
     assert Arg(required=True).validated("asdf") == 'asdf'
     assert Arg(required=True).validated(None) is None
+
+    # with pytest.raises(TypeError):
+    #     Arg(required=True).validated(4)
