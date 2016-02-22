@@ -4,7 +4,7 @@ python:
   - "3.5"
 
 env:
-  - CONFIG="pip install pytest --use-mirrors"
+  - CONFIG="pip install pytest"
 
 install:
   - $CONFIG
