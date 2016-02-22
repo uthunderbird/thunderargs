@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+
+env:
+  - CONFIG="pip install pytest --use-mirrors"
+
+install:
+  - $CONFIG
+  - "python setup.py install"
+
+script: "py.test ."
