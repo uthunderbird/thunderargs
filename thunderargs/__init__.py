@@ -28,6 +28,7 @@ class BaseArg(object):
         self.transform_after = transform_after
         self.arg_name = arg_name
         self.safe = safe
+        self.configure_validators()
 
     def configure_validators(self):
         for number, validator in enumerate(self.validators):
