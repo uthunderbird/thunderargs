@@ -46,4 +46,4 @@ def test_required():
         return op(x, y)
     assert calc(5, 6, op='*') == 30
     with pytest.raises(ArgumentRequired):
-        calc(op=4)
+        calc(op='+')
