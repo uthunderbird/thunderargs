@@ -1,10 +1,11 @@
 import pytest
-from thunderargs import Arg, Nothing, ArgumentRequired
+from thunderargs import Arg, ArgumentRequired
+from thunderargs.helpers import Nothing
 
 
 def test_type():
-    assert Arg().validated(4) == '4'
-    assert Arg(float).validated(2) == 2.0
+    assert Arg(convert_to=str).validated(4) == '4'
+    assert Arg((int, float), convert_to=float).validated(2) == 2.0
 
 
 def test_default():
@@ -24,7 +25,7 @@ def test_required():
         Arg(required=True).validated(Nothing)
 
     assert Arg(required=True).validated("asdf") == 'asdf'
-    assert Arg(required=True).validated(None) is None
+    assert Arg(required=True, safe={None}).validated(None) is None
 
     # with pytest.raises(TypeError):
     #     Arg(required=True).validated(4)

@@ -1,136 +1,103 @@
+from functools import reduce
+
+from thunderargs.helpers import Nothing
 from .errors import ValidationError, ArgumentRequired
+from .transfarm import set_default_if_unset, Transformer
+from .validfarm import Validator, type_is, type_in, neq
 
 __author__ = 'thunder'
 __version__ = '0.3.1a6'
 
 
-class Nothing:
-    pass
-
-
-class Arg(object):
-
-    """
-    Basic argument class
-    """
-
-    DEFAULT_SOURCE = None
+class BaseArg(object):
 
     def __call__(self, value):
         return self.validated(value)
 
-    def __init__(self, p_type=str, default=Nothing, multiple=False, required=False,
-                 validators=[], expander=None, suppress_expanding_check=False,
-                 source=None, arg_name=None):
+    def __init__(self, validators=(), transform_before=(), transform_after=(), arg_name=None, safe=set()):
+
+        if not all([isinstance(validator, Validator) for validator in validators]):
+            raise TypeError("All validators should be `Validator` instances")
+
+        if not all([isinstance(transformer, Transformer) for transformer in transform_before]) or\
+           not all([isinstance(transformer, Transformer) for transformer in transform_after]):
+            raise TypeError("All transformers should be callable")
+
+        self.validators = validators
+        self.transform_before = transform_before
+        self.transform_after = transform_after
+        self.arg_name = arg_name
+        self.safe = safe
+
+    def configure_validators(self):
+        for number, validator in enumerate(self.validators):
+            validator.arg_name = self.arg_name
+            validator.validator_no = number
+
+    def _validate(self, value):
+        value = reduce(lambda x, y: y(x), filter(lambda x: x.is_acceptable(value), self.transform_before), value)
+        if value in self.safe:
+            return value
+        if self.validators:
+            for validator in self.validators:
+                validator(value)
+        value = reduce(lambda x, y: y(x), filter(lambda x: x.is_acceptable(value), self.transform_after), value)
+        return value
+
+    def validated(self, value):
+        return self._validate(value)
+
+
+class Arg(BaseArg):
+
+    """
+    Argument class
+    """
+
+    def __init__(self, expected_type_or_types=(str,), convert_to=None, default=Nothing, required=False,
+                 validators=None, expander=None, safe=None, **kwargs):
 
         if required and default is not Nothing:
             raise ValueError("Argument can't have default value and be required at same time")
 
-        if validators:
-            for validator in validators:
-                if not callable(validator):
-                    raise ValueError("All validators must be callable")
-
         if expander and not (callable(expander) or type(expander) is dict):
             raise ValueError("Expander must be callable or dict")
 
-        if validators and default:
+        if not validators:
+            validators = []
 
-            if multiple:
-                for i, value in enumerate(default):
-                    for j, validator in enumerate(validators):
+        transform_before = []
+        transform_after = []
+        if safe is None:
+            safe = set()
 
-                        if not isinstance(value, p_type) and value is not Nothing:
-                            raise ValueError("{} is not {} instance".format(value, p_type.__name__))
+        if isinstance(expected_type_or_types, type):
+            validators.insert(0, type_is(expected_type_or_types))
+        elif isinstance(expected_type_or_types, (list, tuple)):
+            validators.insert(0, type_in(expected_type_or_types))
+        elif expected_type_or_types is not None:
+            raise TypeError("You should specify expected types or set it to None")
 
-                        if not validator(value):
-                            raise ValueError("Default value {} is not passed validator #{}".format(
-                                value, j
-                            ))
-            else:
+        self.acceptable = expected_type_or_types
 
-                if not isinstance(default, p_type):
-                    raise ValueError("{} is not {} instance".format(default, p_type.__name__))
+        if default is not Nothing:
+            transform_before.append(set_default_if_unset(default))
+            safe.add(default)
 
-                for i, validator in enumerate(validators):
-                    if not validator(default):
-                        raise ValueError("Default value {} is not passed validator #{}".format(
-                                default, i
-                            ))
+        if convert_to is not None:
+            transform_before.append(Transformer(convert_to, lambda x: not isinstance(x, convert_to)))
 
-        self.type = p_type
-        self.default = default
-        self.multiple = multiple
-        self.required = required
-        self.validators = validators
-        self.expander = expander
-        self.check_expanding = not suppress_expanding_check
-        self.source = source or self.DEFAULT_SOURCE
-        self.__name__ = arg_name
+        if required:
+            validators.insert(0, neq(Nothing, ArgumentRequired))
 
-    def _validate(self, value):
-        """Perform conversion and validation on ``value``."""
+        if isinstance(expander, dict):
+            transform_after.append(Transformer(lambda x: expander.__getitem__))
+        elif callable(expander):
+            transform_after.append(Transformer(expander))
+        elif expander is not None:
+            raise TypeError("Expander should be callable or dict")
 
-        if not isinstance(value, self.type) and value is not Nothing and value is not None:
-            try:
-                typed_value = self.type(value)
-            except TypeError:
-                raise TypeError("Argument {} must be `{}`, not `{}`".format(self.__name__,
-                                                                            self.type.__name__,
-                                                                            type(value).__name__))
-
-        elif value is Nothing and self.default is not Nothing:
-            typed_value = self.default
-
-        else:
-            typed_value = value
-
-        if self.validators and value is not Nothing:
-            for validator_no, validator in enumerate(self.validators):
-                if not validator(typed_value):
-                    template = getattr(validator, 'message',
-                                       "Argument {arg_name} failed at validator #{validator_no}."
-                                       "Given value: {value}")
-
-                    error_class = getattr(validator, 'error_class', ValidationError)
-
-                    error_code = getattr(validator, 'error_code', 10000)
-
-                    opt = getattr(validator, 'opt', {})
-
-                    raise error_class(message_template=template, error_code=error_code,
-                                      arg_name=self.__name__, value=value,
-                                      validator_no=validator_no, **opt)
-
-        if self.expander:
-            if isinstance(self.expander, dict):
-
-                if not typed_value in self.expander and self.check_expanding:
-                    raise KeyError("Can't find %s in expander" % typed_value)
-
-                else:
-                    return self.expander.get(typed_value)
-
-            else:
-                return self.expander(typed_value)
-
-        return typed_value
-
-    def validated(self, value):
-        """
-        Convert and validate the given value according to the ``p_type``
-        Sets default if value is None
-        """
-
-        if self.multiple:
-            if self.required and value == []:
-                raise ArgumentRequired("Argument {} is required".format(self.__name__))
-            return map(self._validate, value)
-
-        if value is Nothing and self.required:
-            raise ArgumentRequired("Argument {} is required".format(self.__name__))
-
-        return self._validate(value)
+        super().__init__(validators, transform_before, transform_after, safe=safe, **kwargs)
 
 
 class Parser(object):
@@ -145,7 +112,10 @@ class Parser(object):
         self.structure = structure
         self.ordered_names = ordered_names
         for name, arg in structure.items():
-            arg.__name__ = arg.__name__ or name
+            arg.arg_name = arg.arg_name or name
+
+    def prepare_hints(self):
+        return {k: v.acceptable for k, v in self.structure.items()}
 
     def validated(self, args, dct):
         args = dict(zip(self.ordered_names, args))

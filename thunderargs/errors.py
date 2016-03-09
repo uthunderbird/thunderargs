@@ -16,7 +16,7 @@ class ValidationError(ThunderargsError):
         super().__init__(message_template.format(*args, **kwargs))
 
 
-class ArgumentRequired(ThunderargsError):
+class ArgumentRequired(ValidationError):
     pass
 
 

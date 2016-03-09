@@ -20,13 +20,17 @@ class Endpoint(object):
 
         self.__annotations__ = func.__annotations__
         self.__name__ = func.__name__
+        self.__code__ = func.__code__
+        self.__defaults__ = func.__defaults__
+        self.__kwdefaults__ = func.__kwdefaults__
 
-        for arg_obj in self.__annotations__.values():
-            arg_obj.source = arg_obj.source or default_source
+        # for arg_obj in self.__annotations__.values():
+        #     arg_obj.source = arg_obj.source or default_source
 
         if func.__annotations__:
             # Создаём парсер для данной структуры данных
             self.parser = Parser(func.__annotations__, func.__code__.co_varnames)
+            self.__annotations__ = self.parser.prepare_hints()
             # Делаем инстансы данного класса вызываемыми.
             # Целевая функция оборачивается в декоратор, который
             # описн ниже
