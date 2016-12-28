@@ -18,6 +18,6 @@ def test_fabric_and_exception():
     try:
         len_gt_5('lol')
     except ValidationError as e:
-        assert e.opt['min_len'] == 6
+        assert e.opt['min_len'] == 5
     assert len_gt_5('asdfqq') is None
 

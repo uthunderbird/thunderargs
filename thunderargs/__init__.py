@@ -58,7 +58,9 @@ class BaseArg(object):
 
     def get_description(self):
         return {'name': self.arg_name,
-                'validators': [validator.get_description() for validator in self.validators]}
+                'validators': [validator.get_description() for validator in self.validators],
+                'transform_before': [transformator.description for transformator in self.transform_before],
+                'transform_after': [transformator.description for transformator in self.transform_after]}
 
 
 class Arg(BaseArg):
@@ -98,7 +100,8 @@ class Arg(BaseArg):
             safe.add(default)
 
         if convert_to is not None:
-            transform_before.append(Transformer(convert_to, lambda x: not isinstance(x, convert_to)))
+            transform_before.append(Transformer(convert_to, lambda x: not isinstance(x, convert_to),
+                                                "Would be converted to {type}".format(type=convert_to.__name__)))
 
         if required:
             validators.insert(0, nis(Nothing, ArgumentRequired, "`{arg_name}` is required"))

@@ -2,6 +2,14 @@ class ThunderargsError(Exception):
     pass
 
 
+class WrongArgumentConfiguration(ThunderargsError):
+    pass
+
+
+class NotImplemented(ThunderargsError):
+    pass
+
+
 class ValidationError(ThunderargsError):
 
     def __init__(self, message_template, *args, **kwargs):

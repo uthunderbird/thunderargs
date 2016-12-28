@@ -6,11 +6,12 @@ class Transformer(object):
     def __call__(self, value):
         return self.transformer(value)
 
-    def __init__(self, transformer, condition_or_conditions=()):
+    def __init__(self, transformer, condition_or_conditions=(), description=""):
         if callable(condition_or_conditions):
             condition_or_conditions = (condition_or_conditions,)
         self.conditions = condition_or_conditions
         self.transformer = transformer
+        self.description = description
 
     def is_acceptable(self, value):
         # TODO `all` or `any`?
@@ -18,4 +19,5 @@ class Transformer(object):
 
 
 def set_default_if_unset(default):
-    return Transformer(lambda x: default, lambda x: x is Nothing)
+    return Transformer(lambda x: default, lambda x: x is Nothing,
+                       description="Default value: {default}".format(default=default))

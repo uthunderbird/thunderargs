@@ -43,7 +43,7 @@ def validator(*args, **kwargs):
 def len_gt(x):
     return Validator(lambda lst: len(lst) > x,
                      "Length of `{arg_name}` must be greater than `{min_len}`",
-                     min_len=x+1)
+                     min_len=x)
 
 
 def len_lt(x):

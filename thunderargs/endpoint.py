@@ -39,8 +39,19 @@ class Endpoint(object):
 
         for arg_name, arg_help in self.get_help_for_args().items():
             print(arg_name)
+
+            for info in arg_help['transform_before']:
+                print('\t{help}'.format(help=info))
+            else:
+                print()
+
             for val_help in arg_help['validators']:
                 print('\t{help}'.format(help=val_help))
+            else:
+                print()
+
+            for info in arg_help['transform_after']:
+                print('\t{help}'.format(help=info))
 
     def steal_func_params(self, func):
         self.__name__ = func.__name__
