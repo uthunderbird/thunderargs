@@ -19,7 +19,7 @@ class Endpoint(object):
     def _decorate(self, func):
         if func._arg_description:
             self.parser = Parser(func._arg_description, func.__code__.co_varnames)
-            # self.__arg_description_help = self.parser.prepare_hints()
+            self.__arg_description_help = self.parser.prepare_hints()
             # Делаем инстансы данного класса вызываемыми.
             # Целевая функция оборачивается в декоратор, который
             # описн ниже
@@ -27,22 +27,43 @@ class Endpoint(object):
         else:
             self.callable = func
 
+    def get_help_for_args(self):
+        return self.__arg_description_help
+
+    def print_help(self):
+        print(self.__name__)
+        print()
+        if self.__doc__:
+            print(self.__doc__)
+            print()
+
+        for arg_name, arg_help in self.get_help_for_args().items():
+            print(arg_name)
+            for val_help in arg_help['validators']:
+                print('\t{help}'.format(help=val_help))
+
+    def steal_func_params(self, func):
+        self.__name__ = func.__name__
+        self.__code__ = func.__code__
+        self.__defaults__ = func.__defaults__
+        self.__kwdefaults__ = func.__kwdefaults__
+        self.__doc__ = func.__doc__
+
     def __init__(self, func=None, **structure):
 
         # I can use `wraps` here, right?
-        # self.__name__ = func.__name__
-        # self.__code__ = func.__code__
-        # self.__defaults__ = func.__defaults__
-        # self.__kwdefaults__ = func.__kwdefaults__
 
-        wraps(func)(self)  # TODO check
+
+        # wraps(func)(self)  # TODO check
 
         if not callable(func) and structure:
             def first_call(func):
+                self.steal_func_params(func)
                 self._decorate(annotate(**structure)(func))
                 return self
             self.callable = first_call
         else:
+            self.steal_func_params(func)
             self.__arg_description = func._arg_description
             self._decorate(func)
 

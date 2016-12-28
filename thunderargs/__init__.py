@@ -3,7 +3,7 @@ from functools import reduce
 from thunderargs.helpers import Nothing
 from .errors import ValidationError, ArgumentRequired
 from .transfarm import set_default_if_unset, Transformer
-from .validfarm import Validator, type_is, type_in, neq
+from .validfarm import Validator, type_is, type_in, nis
 
 
 __version__ = '0.5.0a'
@@ -56,6 +56,10 @@ class BaseArg(object):
     def validated(self, value):
         return self._validate(value)
 
+    def get_description(self):
+        return {'name': self.arg_name,
+                'validators': [validator.get_description() for validator in self.validators]}
+
 
 class Arg(BaseArg):
 
@@ -97,7 +101,7 @@ class Arg(BaseArg):
             transform_before.append(Transformer(convert_to, lambda x: not isinstance(x, convert_to)))
 
         if required:
-            validators.insert(0, neq(Nothing, ArgumentRequired))
+            validators.insert(0, nis(Nothing, ArgumentRequired, "`{arg_name}` is required"))
 
         if isinstance(expander, dict):
             transform_after.append(Transformer(lambda x: expander.__getitem__))
@@ -124,7 +128,7 @@ class Parser(object):
             arg.arg_name = arg.arg_name or name
 
     def prepare_hints(self):
-        return {k: v.acceptable for k, v in self.structure.items()}
+        return {k: v.get_description() for k, v in self.structure.items()}
 
     def validated(self, args, dct):
         args = dict(zip(self.ordered_names, args))
