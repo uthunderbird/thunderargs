@@ -1,6 +1,3 @@
-__author__ = 'thunder'
-
-
 class ThunderargsError(Exception):
     pass
 
