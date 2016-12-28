@@ -6,7 +6,7 @@ from .transfarm import set_default_if_unset, Transformer
 from .validfarm import Validator, type_is, type_in, neq
 
 
-__version__ = '0.4.0a'
+__version__ = '0.5.0a'
 
 
 class BaseArg(object):
