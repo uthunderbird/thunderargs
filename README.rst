@@ -2,7 +2,7 @@
 Thunderargs
 =========
 
-|pypi| |coverage| |unix_build|
+|pypi| |unix_build|
 
 Abstract
 --------
@@ -38,10 +38,6 @@ Read the tests for more examples.
 .. |pypi| image:: https://img.shields.io/pypi/v/thunderargs.svg?style=flat-square&label=latest%20version
     :target: https://pypi.python.org/pypi/thunderargs
     :alt: Latest version released on PyPi
-
-.. |coverage| image:: https://img.shields.io/coveralls/uthunderbird/thunderargs/master.svg?style=flat-square
-    :target: https://coveralls.io/r/uthunderbird/thunderargs?branch=master
-    :alt: Test coverage
 
 .. |unix_build| image:: https://img.shields.io/travis/uthunderbird/thunderargs/master.svg?style=flat-square&label=unix%20build
     :target: http://travis-ci.org/uthunderbird/thunderargs/
