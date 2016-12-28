@@ -1,4 +1,4 @@
-from .errors import ValidationError, customize_error
+from .errors import ValidationError
 
 
 class Validator(object):
@@ -58,7 +58,7 @@ def gt(x):
 
 def lt(x):
 
-    @customize_error("Value of `{arg_name}` must be less than `{min_val}`", min_val=x)
+    @validator("Value of `{arg_name}` must be less than `{min_val}`", min_val=x)
     def cond(value):
         return value < x
 

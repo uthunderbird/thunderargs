@@ -20,3 +20,4 @@ def test_fabric_and_exception():
     except ValidationError as e:
         assert e.opt['min_len'] == 6
     assert len_gt_5('asdfqq') is None
+

@@ -11,6 +11,15 @@ __version__ = '0.5.0a'
 
 class BaseArg(object):
 
+    def get_arg_name(self):
+        return self._arg_name
+
+    def set_arg_name(self, value):
+        self._arg_name = value
+        self.configure_validators()
+
+    arg_name = property(get_arg_name, set_arg_name)
+
     def __call__(self, value):
         return self.validated(value)
 
@@ -28,7 +37,6 @@ class BaseArg(object):
         self.transform_after = transform_after
         self.arg_name = arg_name
         self.safe = safe
-        self.configure_validators()
 
     def configure_validators(self):
         for number, validator in enumerate(self.validators):
