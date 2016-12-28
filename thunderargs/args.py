@@ -22,8 +22,8 @@ class BasicNumberArg(Arg):
             if isinstance(in_range, range):
                 validators.append(val_in(in_range))
             elif (isinstance(in_range, list) or isinstance(in_range, tuple)) and len(in_range) == 2:
-                less_than = in_range[0]
-                greater_than = in_range[1]
+                greater_than = in_range[0]
+                less_than = in_range[1]
 
         if less_than is not None:
             assert isinstance(less_than, self._type), "less_than should be {type}".format(type=self._type_name())

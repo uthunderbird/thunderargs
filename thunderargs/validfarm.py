@@ -66,7 +66,7 @@ def len_neq(x):
 
 def gt(x):
 
-    @validator("Value of `{arg_name}` must be greater than `{max_val}`", max_val=x+1)
+    @validator("Value of `{arg_name}` must be greater than `{max_val}`", max_val=x)
     def cond(value):
         return value > x
 
